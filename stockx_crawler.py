@@ -56,7 +56,7 @@ def get_shoe_info(shoe):
         return None
 
 
-def crawl_stockx_data(shoe):
+def crawl_stockx_data(shoe, save_csv=False):
     """
     crawl all transaction data of a given shoe for stockx
     :param shoe: Name of the shoe taken from url
@@ -95,9 +95,10 @@ def crawl_stockx_data(shoe):
     df_shoe.drop_duplicates(inplace=True)
     df_shoe['time'] = pd.to_datetime(df_shoe.time.astype(str))
     df_shoe.set_index('time', inplace=True)
-    df_shoe.to_csv(out_file, encoding="utf-8", index=None)
+    if save_csv:
+        df_shoe.to_csv(out_file, encoding="utf-8")
     return df_shoe
 
 if __name__=="__main__":
     shoe_name = sys.argv[1]
-    crawl_stockx_data(shoe_name)
+    crawl_stockx_data(shoe_name,True)
