@@ -1,7 +1,3 @@
-import sys
-import requests
-import datetime
-import json
 import pandas as pd
 from pathlib import Path
 from bs4 import BeautifulSoup
@@ -87,7 +83,7 @@ def crawl_stockx_data(shoe):
         if check_request_status(r.status_code):
             for x in r.json()["ProductActivity"]:
                 d = datetime.fromisoformat(x["createdAt"])
-                row = shoe_info + [d, x["amount"], x["shoeSize"], x["localAmount"], x["localCurrency"]]
+                row = shoe_info + [d, int(x["amount"]), x["shoeSize"], x["localAmount"], x["localCurrency"]]
                 rows.append(row)
             if r.json()["Pagination"]["nextPage"] is None:
                 break
@@ -97,10 +93,11 @@ def crawl_stockx_data(shoe):
 
     df_shoe = pd.DataFrame(data=rows, columns=header)
     df_shoe.drop_duplicates(inplace=True)
+    df_shoe['time'] = pd.to_datetime(df_shoe.time.astype(str))
+    df_shoe.set_index('time', inplace=True)
     df_shoe.to_csv(out_file, encoding="utf-8", index=None)
     return df_shoe
 
-
-if __name__ == "__main__":
+if __name__=="__main__":
     shoe_name = sys.argv[1]
-    df = crawl_stockx_data(shoe_name)
+    crawl_stockx_data(shoe_name)
